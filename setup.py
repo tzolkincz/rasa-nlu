@@ -25,21 +25,21 @@ tests_requires = [
 
 install_requires = [
     "cloudpickle~=0.6.1",
-    "gevent~=1.3",
+    #"gevent~=20.6.2",
     "klein~=17.10",
-    "boto3~=1.9",
-    "packaging~=18.0",
+    "boto3~=1.34",
+    "packaging>=20.0",
     "typing~=3.6",
     "future~=0.17.1",
     "tqdm~=4.19",
     "requests~=2.20",
     "jsonschema~=2.6",
-    "matplotlib~=2.2",
-    "numpy>=1.16",
+    "matplotlib~=3.8",
+    "numpy>=1.25",
     "simplejson~=3.13",
-    "ruamel.yaml~=0.15.7",
-    "coloredlogs~=10.0",
-    "scikit-learn~=0.20.2"
+    "ruamel.yaml~=0.18.6",
+    "coloredlogs~=15.0.1",
+    "scikit-learn~=1.4.0"
 ]
 
 extras_requires = {
@@ -64,9 +64,10 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         # supported python versions
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Software Development :: Libraries",
     ],
     version=__version__,
