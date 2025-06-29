@@ -13,7 +13,6 @@ from rasa_nlu.components import Component
 logger = logging.getLogger(__name__)
 
 if typing.TYPE_CHECKING:
-    import tensorflow as tf
     from rasa_nlu.config import RasaNLUModelConfig
     from rasa_nlu.training_data import TrainingData
     from rasa_nlu.model import Metadata
@@ -269,30 +268,32 @@ class EmbeddingIntentClassifier(Component):
         return X, Y, intents_for_X
 
     # tf helpers:
-    def _create_tf_embed_nn(self, x_in: 'tf.Tensor', is_training: 'tf.Tensor',
+    def _create_tf_embed_nn(self, x_in: 'tf.Tensor', is_training: bool,
                             layer_sizes: List[int], name: Text) -> 'tf.Tensor':
         """Create nn with hidden layers and name"""
 
+        # reg = tf.contrib.layers.l2_regularizer(self.C2)
         reg = tf.keras.regularizers.L2(self.C2)
+
         x = x_in
         for i, layer_size in enumerate(layer_sizes):
-            x = tf.layers.dense(inputs=x,
+            x = tf.keras.layers.Dense(
                                 units=layer_size,
                                 activation=tf.nn.relu,
                                 kernel_regularizer=reg,
-                                name='hidden_layer_{}_{}'.format(name, i))
-            x = tf.layers.dropout(x, rate=self.droprate, training=is_training)
+                                name='hidden_layer_{}_{}'.format(name, i))(x)
+            x = tf.keras.layers.Dropout(rate=self.droprate)(x, training=is_training)
 
-        x = tf.layers.dense(inputs=x,
+        x = tf.keras.layers.Dense(
                             units=self.embed_dim,
                             kernel_regularizer=reg,
-                            name='embed_layer_{}'.format(name))
+                            name='embed_layer_{}'.format(name))(x)
         return x
 
     def _create_tf_embed(self,
                          a_in: 'tf.Tensor',
                          b_in: 'tf.Tensor',
-                         is_training: 'tf.Tensor'
+                         is_training: bool,
                          ) -> Tuple['tf.Tensor', 'tf.Tensor']:
         """Create tf graph for training"""
 
@@ -401,7 +402,7 @@ class EmbeddingIntentClassifier(Component):
                   Y: np.ndarray,
                   intents_for_X: np.ndarray,
                   loss: 'tf.Tensor',
-                  is_training: 'tf.Tensor',
+                  is_training: bool,
                   train_op: 'tf.Tensor'
                   ) -> None:
         """Train tf graph"""
@@ -436,6 +437,8 @@ class EmbeddingIntentClassifier(Component):
                     {'loss': loss, 'train_op': train_op},
                     feed_dict={self.a_in: batch_a,
                                self.b_in: batch_b,}
+                            # is_training: tf.placeholder_with_default(False, shape=())}
+                            #is_training: True}
                 )
                 ep_loss += sess_out.get('loss') / batches_per_epoch
 
@@ -465,7 +468,7 @@ class EmbeddingIntentClassifier(Component):
     def _output_training_stat(self,
                               X: np.ndarray,
                               intents_for_X: np.ndarray,
-                              is_training: 'tf.Tensor') -> np.ndarray:
+                              is_training: bool) -> np.ndarray:
         """Output training statistics"""
 
         n = self.evaluate_on_num_examples
@@ -474,7 +477,9 @@ class EmbeddingIntentClassifier(Component):
 
         train_sim = self.session.run(self.sim_op,
                                      feed_dict={self.a_in: X[ids],
-                                                self.b_in: all_Y,})
+                                                self.b_in: all_Y,
+                                                })
+                                                # is_training: False})
 
         train_acc = np.mean(np.argmax(train_sim, -1) == intents_for_X[ids])
         return train_acc
@@ -513,6 +518,12 @@ class EmbeddingIntentClassifier(Component):
         with self.graph.as_default():
             # set random seed
             np.random.seed(self.random_seed)
+
+            print("mrdat§!!")
+            print("mrdat§!!")
+            print("mrdat§!!")
+            print("mrdat§!!", self.random_seed)
+            # tf.random.set_seed(self.random_seed)
             tf.set_random_seed(self.random_seed)
 
             self.a_in = tf.placeholder(tf.float32, (None, X.shape[-1]),
@@ -520,6 +531,8 @@ class EmbeddingIntentClassifier(Component):
             self.b_in = tf.placeholder(tf.float32, (None, None, Y.shape[-1]),
                                        name='b')
 
+            # is_training = tf.placeholder_with_default(False, shape=())
+            # is_training = False
             is_training = True
 
             (self.word_embed,
@@ -533,7 +546,7 @@ class EmbeddingIntentClassifier(Component):
             train_op = tf.train.AdamOptimizer().minimize(loss)
 
             # train tensorflow graph
-            self.session = tf.Session()
+            self.session = tf.compat.v1.Session()
 
             self._train_tf(X, Y, intents_for_X,
                            loss, is_training, train_op)
