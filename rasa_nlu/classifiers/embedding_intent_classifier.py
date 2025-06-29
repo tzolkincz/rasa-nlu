@@ -519,10 +519,6 @@ class EmbeddingIntentClassifier(Component):
             # set random seed
             np.random.seed(self.random_seed)
 
-            print("mrdat§!!")
-            print("mrdat§!!")
-            print("mrdat§!!")
-            print("mrdat§!!", self.random_seed)
             # tf.random.set_seed(self.random_seed)
             tf.set_random_seed(self.random_seed)
 
