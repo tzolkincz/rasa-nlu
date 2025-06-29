@@ -273,7 +273,7 @@ class EmbeddingIntentClassifier(Component):
                             layer_sizes: List[int], name: Text) -> 'tf.Tensor':
         """Create nn with hidden layers and name"""
 
-        reg = tf.contrib.layers.l2_regularizer(self.C2)
+        reg = tf.keras.regularizers.L2(self.C2)
         x = x_in
         for i, layer_size in enumerate(layer_sizes):
             x = tf.layers.dense(inputs=x,
@@ -435,8 +435,7 @@ class EmbeddingIntentClassifier(Component):
                 sess_out = self.session.run(
                     {'loss': loss, 'train_op': train_op},
                     feed_dict={self.a_in: batch_a,
-                               self.b_in: batch_b,
-                               is_training: True}
+                               self.b_in: batch_b,}
                 )
                 ep_loss += sess_out.get('loss') / batches_per_epoch
 
@@ -475,8 +474,7 @@ class EmbeddingIntentClassifier(Component):
 
         train_sim = self.session.run(self.sim_op,
                                      feed_dict={self.a_in: X[ids],
-                                                self.b_in: all_Y,
-                                                is_training: False})
+                                                self.b_in: all_Y,)
 
         train_acc = np.mean(np.argmax(train_sim, -1) == intents_for_X[ids])
         return train_acc
@@ -522,7 +520,7 @@ class EmbeddingIntentClassifier(Component):
             self.b_in = tf.placeholder(tf.float32, (None, None, Y.shape[-1]),
                                        name='b')
 
-            is_training = tf.placeholder_with_default(False, shape=())
+            is_training = True
 
             (self.word_embed,
              self.intent_embed) = self._create_tf_embed(self.a_in, self.b_in,
