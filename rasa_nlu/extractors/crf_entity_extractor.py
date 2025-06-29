@@ -8,6 +8,8 @@ from rasa_nlu.extractors import EntityExtractor
 from rasa_nlu.model import Metadata
 from rasa_nlu.training_data import Message, TrainingData
 
+import joblib
+
 try:
     import spacy
 except ImportError:
@@ -348,7 +350,6 @@ class CRFEntityExtractor(EntityExtractor):
              cached_component: Optional['CRFEntityExtractor'] = None,
              **kwargs: Any
              ) -> 'CRFEntityExtractor':
-        from sklearn.externals import joblib
 
         file_name = meta.get("file")
         model_file = os.path.join(model_dir, file_name)
@@ -366,7 +367,6 @@ class CRFEntityExtractor(EntityExtractor):
 
         Returns the metadata necessary to load the model again."""
 
-        from sklearn.externals import joblib
         file_name = file_name + ".pkl"
         if self.ent_tagger:
             model_file_name = os.path.join(model_dir, file_name)
