@@ -517,7 +517,7 @@ class EmbeddingIntentClassifier(Component):
         with self.graph.as_default():
             # set random seed
             np.random.seed(self.random_seed)
-            tf.set_random_seed(self.random_seed)
+            tf.random.set_seed(self.random_seed)
 
             self.a_in = tf.placeholder(tf.float32, (None, X.shape[-1]),
                                        name='a')
