@@ -19,10 +19,8 @@ if typing.TYPE_CHECKING:
     from rasa_nlu.model import Metadata
     from rasa_nlu.training_data import Message
 
-try:
-    import tensorflow as tf
-except ImportError:
-    tf = None
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 
 class EmbeddingIntentClassifier(Component):
@@ -517,7 +515,7 @@ class EmbeddingIntentClassifier(Component):
         with self.graph.as_default():
             # set random seed
             np.random.seed(self.random_seed)
-            tf.random.set_seed(self.random_seed)
+            tf.set_random_seed(self.random_seed)
 
             self.a_in = tf.placeholder(tf.float32, (None, X.shape[-1]),
                                        name='a')
