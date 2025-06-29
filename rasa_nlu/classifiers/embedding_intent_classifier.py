@@ -474,7 +474,7 @@ class EmbeddingIntentClassifier(Component):
 
         train_sim = self.session.run(self.sim_op,
                                      feed_dict={self.a_in: X[ids],
-                                                self.b_in: all_Y,)
+                                                self.b_in: all_Y,}
 
         train_acc = np.mean(np.argmax(train_sim, -1) == intents_for_X[ids])
         return train_acc
